@@ -33,7 +33,7 @@ public class Transaction {
     private User user; // Who initiated the transaction//many transactions linked to one user who initiated
 
     @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = true)
     private Account sender;
 
     @ManyToOne
@@ -63,6 +63,7 @@ public class Transaction {
         this.account = account;
         this.amount = amount;
         this.type = transactionType;
+
 
     }
 }

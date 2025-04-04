@@ -1,7 +1,7 @@
 package com.example.paynest.entity;
 
 public enum TransactionType {
-    Deposit,
+    DEPOSIT,
     WITHDRAW,
     TRANSFER
 }

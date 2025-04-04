@@ -3,6 +3,7 @@ package com.example.paynest.Controller;
 import com.example.paynest.DTO.*;
 import com.example.paynest.service.BankingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,10 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@RequiredArgsConstructor
 public class BankingController {
 
-    private final BankingService bankingService;
+    @Autowired
+    private BankingService bankingService;
 
     // ---- 🟢 User Authentication & Management ----
 
@@ -67,8 +68,8 @@ public class BankingController {
         return ResponseEntity.ok(bankingService.withdraw(accountId, request));
     }
 
-    @PostMapping("/accounts/transfer")
-    public ResponseEntity<TransactionDTO> transfer(@RequestParam Long senderId, @RequestParam Long receiverId,
+    @PostMapping("/accounts/transfer/{senderId}/{receiverId}")
+    public ResponseEntity<TransactionDTO> transfer(@PathVariable Long senderId, @PathVariable Long receiverId,
                                                    @RequestBody TransactionRequestDTO request) {
         return ResponseEntity.ok(bankingService.transfer(senderId, receiverId, request));
     }

@@ -16,9 +16,9 @@ public class TransactionRequestDTO {
 
     private TransactionType type;  // DEPOSIT, WITHDRAW, TRANSFER
 
-    private Long fromAccountId;  // Sender's Account ID (For Transfers)
+    private Long senderId;  // Sender's Account ID (For Transfers)
 
-    private Long toAccountId;  // Receiver's Account ID (For Transfers)
+    private Long receiverId;  // Receiver's Account ID (For Transfers)
 
     private String description;  // Optional transaction details
 
