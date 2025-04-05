@@ -38,9 +38,14 @@ public class BankingServiceImpl implements BankingService {
         }
 
         User user = new User();
-        user.setUsername(userDTO.getUsername());
+        user.setFullName(userDTO.getFullName());
         user.setEmail(userDTO.getEmail());
         user.setPassword(userDTO.getPassword());
+
+        // Generate username from full name
+        String generatedUsername = generateUsername(userDTO.getFullName());
+        user.setUsername(generatedUsername);
+
         if (user.getCreatedBy() == null) {
             user.setCreatedBy(1L); // Default value (e.g., System or Admin user ID)
         }
@@ -52,6 +57,9 @@ public class BankingServiceImpl implements BankingService {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         user.setPhoneno(userDTO.getPhoneno());
+        user.setAddress(userDTO.getAddress());
+        user.setPoi(userDTO.getPoi());
+
 
 
 
@@ -76,7 +84,7 @@ public class BankingServiceImpl implements BankingService {
 
     @Override
     public String loginUser(LoginRequestDTO loginRequestDTO) {
-        User user = userRepository.findByEmail(loginRequestDTO.getEmail())
+        User user = userRepository.findByUsername(loginRequestDTO.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!loginRequestDTO.getPassword().equals(user.getPassword())) {
@@ -139,32 +147,113 @@ public class BankingServiceImpl implements BankingService {
     @Override
     public TransactionDTO deposit(Long accountId, TransactionRequestDTO transactionRequest) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new RuntimeException("Account not found" + accountId));
+
+        User user = account.getUser();
+
         account.setBalance(account.getBalance().add(BigDecimal.valueOf(transactionRequest.getAmount())));
         accountRepository.save(account);
 
-        Transaction transaction = new Transaction(account, BigDecimal.valueOf(transactionRequest.getAmount()), TransactionType.Deposit);
-        transactionRepository.save(transaction);
+        Transaction transaction = new Transaction(account, BigDecimal.valueOf(transactionRequest.getAmount()), TransactionType.DEPOSIT);
+        transaction.setAmount(BigDecimal.valueOf(transactionRequest.getAmount()));
+        transaction.setAccount(account);
+        transaction.setUser(user);
+        transaction.setType(TransactionType.DEPOSIT);
+        transaction.setSender(account);
+        transaction.setReceiver(account);//
 
-        return new TransactionDTO(transaction);
+        LocalDateTime now = LocalDateTime.now();
+        transaction.setCreatedAt(now);
+        transaction.setUpdatedAt(now);
+        transaction.setCreatedBy(user.getId());
+        transaction.setUpdatedBy(user.getId());
+        transaction.setTimestamp(now);
+        transaction.setApproved(true);
+
+        account.setBalance(account.getBalance().add(BigDecimal.valueOf(transactionRequest.getAmount())));
+        account.setUpdatedAt(now);
+        account.setUpdatedBy(user.getId());
+
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        accountRepository.save(account);
+
+
+        return new TransactionDTO(savedTransaction);
     }
 
     @Override
     public TransactionDTO withdraw(Long accountId, TransactionRequestDTO transactionRequest) {
+        // Validate the account exists
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-      BigDecimal withdrawalAmount = BigDecimal.valueOf(transactionRequest.getAmount());
+                .orElseThrow(() -> new IllegalArgumentException("Account not found with ID: " + accountId));
 
-        if (account.getBalance() .compareTo(withdrawalAmount) <0) {
-            throw new RuntimeException("Insufficient balance");
+        User user = account.getUser();
+
+        if (user == null || user.getId() == null) {
+            throw new IllegalArgumentException("User associated with the account is missing or invalid.");
         }
 
-        account.setBalance(account.getBalance() .subtract(withdrawalAmount) );
-        accountRepository.save(account);
+        // Convert Double to BigDecimal for precision
+        BigDecimal withdrawAmount = BigDecimal.valueOf(transactionRequest.getAmount());
 
-        Transaction transaction = new Transaction(account,withdrawalAmount,  TransactionType.WITHDRAW);
-        transactionRepository.save(transaction);
+        // Ensure sufficient balance
+        if (account.getBalance().compareTo(withdrawAmount) < 0) {
+            throw new IllegalStateException("Insufficient funds for withdrawal.");
+        }
 
+        // Check if approval is required (Child account exceeding limit)
+        boolean needsApproval = user.getRole() == Role.CHILD &&
+                (user.getTransactionLimit() == null || withdrawAmount.compareTo(user.getTransactionLimit()) > 0);
+
+        // Create transaction record
+        Transaction transaction = new Transaction(account, BigDecimal.valueOf(transactionRequest.getAmount()), TransactionType.WITHDRAW);
+        transaction.setAccount(account);
+        transaction.setUser(user);
+        transaction.setType(TransactionType.WITHDRAW);
+        transaction.setAmount(withdrawAmount);
+        transaction.setSender(account);//
+         transaction.setReceiver(account);//
+
+
+        LocalDateTime now = LocalDateTime.now();
+        transaction.setCreatedAt(now);
+        transaction.setUpdatedAt(now);
+        transaction.setCreatedBy(user.getId());
+        transaction.setUpdatedBy(user.getId());
+        transaction.setTimestamp(now);
+        transaction.setApproved(!needsApproval); // Auto-approve if approval not required
+
+        // Save the transaction
+        transaction = transactionRepository.save(transaction);
+
+        // If transaction is approved, deduct from balance
+        if (!needsApproval) {
+            account.setBalance(account.getBalance().subtract(withdrawAmount));
+            account.setUpdatedAt(now);
+            account.setUpdatedBy(user.getId());
+            accountRepository.save(account);
+
+            // Send notification to user
+            Notification notification = new Notification();
+            notification.setUser(user);
+            notification.setCreatedBy(user.getId());
+            notification.setMessage("Withdrawal of " + withdrawAmount + " from account " + account.getAccountNumber());
+            notification.setTimestamp(now);
+            notification.setRead(false);
+            notificationRepository.save(notification);
+        } else {
+            // Send approval request notification to parent
+            Notification approvalNotification = new Notification();
+            approvalNotification.setUser(user.getParent()); // Assuming `getParent()` method exists
+            approvalNotification.setCreatedBy(user.getId());
+            approvalNotification.setMessage("Child account requested withdrawal of " + withdrawAmount);
+            approvalNotification.setTimestamp(now);
+            approvalNotification.setRead(false);
+            notificationRepository.save(approvalNotification);
+        }
+
+        // Return the DTO representation
         return new TransactionDTO(transaction);
     }
 
@@ -174,6 +263,16 @@ public class BankingServiceImpl implements BankingService {
                 .orElseThrow(() -> new RuntimeException("Sender account not found"));
         Account receiver = accountRepository.findById(receiverId)
                 .orElseThrow(() -> new RuntimeException("Receiver account not found"));
+
+
+
+
+        User senderUser =  sender.getUser();
+        User receiverUser = receiver.getUser();
+
+        if (senderUser == null || senderUser.getId() == null) {
+            throw new IllegalArgumentException("Sender user is missing or invalid");
+        }
 
         BigDecimal transferAmount = BigDecimal.valueOf(transactionRequest.getAmount());
 
@@ -189,10 +288,45 @@ public class BankingServiceImpl implements BankingService {
 
 
         // ✅ Create separate transactions for sender & receiver
-        Transaction senderTransaction = new Transaction(sender, transferAmount, TransactionType.WITHDRAW);
+        Transaction senderTransaction = new Transaction();
+
+
+
+        senderTransaction.setAccount(sender);
+
+        senderTransaction.setUser(senderUser);
+        senderTransaction.setAmount(transferAmount);
+
+        senderTransaction.setType(TransactionType.WITHDRAW);
+
+
+
+
+        LocalDateTime now = LocalDateTime.now();
+        senderTransaction.setCreatedAt(now);
+        senderTransaction.setUpdatedAt(now);
+        senderTransaction.setCreatedBy(senderUser.getId());
+        senderTransaction.setUpdatedBy(senderUser.getId());
+        senderTransaction.setTimestamp(now);
+
+
         transactionRepository.save(senderTransaction);
 
-        Transaction receiverTransaction = new Transaction(receiver, transferAmount, TransactionType.Deposit);
+        Transaction receiverTransaction = new Transaction(receiver, transferAmount, TransactionType.DEPOSIT);
+        receiverTransaction.setId(receiver.getId());
+        receiverTransaction.setAccount(receiver);
+        receiverTransaction.setUser(receiverUser);
+        receiverTransaction.setAmount(transferAmount);
+
+        receiverTransaction .setType(TransactionType.DEPOSIT);
+
+        receiverTransaction.setCreatedAt(now);
+        receiverTransaction.setUpdatedAt(now);
+        receiverTransaction.setCreatedBy(receiverUser.getId());
+        receiverTransaction.setUpdatedBy(receiverUser.getId());
+        receiverTransaction.setTimestamp(now);
+
+
         transactionRepository.save(receiverTransaction);
 
 
@@ -288,6 +422,18 @@ public class BankingServiceImpl implements BankingService {
         } while (!isUnique);
 
         return accountNumber;
+    }
+
+    private String generateUsername(String fullName) {
+        // Remove spaces and convert to lowercase
+        String baseName = fullName.replaceAll("\\s", "").toLowerCase();
+
+        // Add a random number to ensure uniqueness
+        String username = baseName + Math.round(Math.random() * 1000);
+
+        // Check if username already exists, if so, regenerate
+
+        return username;
     }
 
 }

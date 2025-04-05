@@ -16,8 +16,8 @@ public class TransactionDTO {
     private String type;  // "DEPOSIT", "WITHDRAWAL", "TRANSFER"
     private BigDecimal amount;
     private LocalDateTime timestamp;
-    private Long fromAccountId;  // For transfers
-    private Long toAccountId;  // For transfers
+    private Long senderId;  // For transfers
+    private Long receiverId;  // For transfers
     private Boolean approved;
 
     // Constructor to map from Transaction entity
@@ -30,11 +30,11 @@ public class TransactionDTO {
 
         // Handling different transaction types
         if (transaction.getType().toString().equals("TRANSFER")) {
-            this.fromAccountId = transaction.getAccount() != null ? transaction.getAccount().getId() : null;
-            this.toAccountId = transaction.getReceiver() != null ? transaction.getReceiver().getId() : null;
+            this.senderId = transaction.getAccount() != null ? transaction.getAccount().getId() : null;
+            this.receiverId = transaction.getReceiver() != null ? transaction.getReceiver().getId() : null;
         } else {
-            this.fromAccountId = transaction.getAccount() != null ? transaction.getAccount().getId() : null;
-            this.toAccountId = null; // No toAccount for DEPOSIT/WITHDRAW
+            this.senderId = transaction.getAccount() != null ? transaction.getAccount().getId() : null;
+            this.receiverId = null; // No toAccount for DEPOSIT/WITHDRAW
         }
     }
 }

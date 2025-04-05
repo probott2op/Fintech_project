@@ -21,6 +21,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String fullName;
+
     @Column(nullable = false,unique = true)
     private String username;
 
@@ -32,6 +35,12 @@ public class User {
 
     @Column
     private String phoneno;
+
+    @Column
+    private String address;
+
+    @Column
+    private String poi;
 
     private BigDecimal transactionLimit;
 

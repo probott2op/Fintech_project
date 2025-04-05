@@ -15,6 +15,7 @@ import java.util.List;
 
 public class UserDTO {
     private Long id;
+    private String fullName;
     private String username;
     private String password;
     private String email;
@@ -22,6 +23,8 @@ public class UserDTO {
     private Long parentId;  // Null if the user is a parent
     private List<Long> childIds;// List of children for a parent
     private String phoneno;
+    private String address;
+    private String poi;
 
     public UserDTO(User user) {
         this.id = user.getId();
@@ -30,6 +33,9 @@ public class UserDTO {
         this.role = (user.getRole() != null) ? user.getRole().toString() : null;
         this.parentId = (user.getParent() != null) ? user.getParent().getId() : null;
         this.phoneno = user.getPhoneno();
+        this.address = user.getAddress();
+        this.poi = user.getPoi();
+        this.fullName = user.getFullName();
     }
 }
 

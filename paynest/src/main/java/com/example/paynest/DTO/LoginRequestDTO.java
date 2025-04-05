@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LoginRequestDTO {
 
-    private String email;  // User’s Email (Used for Login)
+    private String username;  // User’s Email (Used for Login)
 
     private String password;  // User’s Password (Hashed during Authentication)
 
