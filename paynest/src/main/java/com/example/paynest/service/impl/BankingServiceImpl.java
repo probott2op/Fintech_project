@@ -6,6 +6,7 @@ import com.example.paynest.entity.*;
 import com.example.paynest.service.BankingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,11 +18,16 @@ import java.util.List;
 @Transactional
 public class BankingServiceImpl implements BankingService {
 
-    private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
-    private final NotificationRepository notificationRepository;
-    private final AuditLogRepository auditLogRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private AuditLogRepository auditLogRepository;
     //private final PasswordEncoder passwordEncoder;//
 
     // ---- User Management ----
