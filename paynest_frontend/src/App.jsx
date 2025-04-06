@@ -1,4 +1,5 @@
 import React from 'react';
+import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './utils/AuthContext';
 import PrivateRoute from './utils/PrivateRoute';
@@ -28,7 +29,6 @@ import SetLimits from './components/parentControls/SetLimits';
 import PendingTransactions from './components/parentControls/PendingTransactions';
 import AuditLogs from './components/parentControls/AuditLogs';
 
-import Home from './components/Home.jsx';
 
 // Error Pages
 const UnauthorizedPage = () => (
@@ -76,7 +76,7 @@ const App = () => {
                     <div className="flex-grow-1">
                         <Routes>
                             {/* Public Routes */}
-                            <Route path="/" element={<Home />} />
+                            <Route path="/" element={<HomePage />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 

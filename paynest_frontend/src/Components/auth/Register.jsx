@@ -6,12 +6,15 @@ import { Form, Button, Container, Row, Col, Card, Alert } from 'react-bootstrap'
 const Register = () => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState({
-        firstName: '',
-        lastName: '',
+        fullName: '',
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'CHILD' // Default role, can be changed to PARENT
+        role: 'CHILD', // Default role, can be changed to PARENT
+        address: '',
+        phoneno: '',
+        aadhaar: '',
+
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
