@@ -7,6 +7,7 @@ import com.example.paynest.service.BankingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,7 +41,8 @@ public class BankingServiceImpl implements BankingService {
         User user = new User();
         user.setFullName(userDTO.getFullName());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
+        final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+        user.setPassword(encoder.encode(userDTO.getPassword()));
 
         // Generate username from full name
         String generatedUsername = generateUsername(userDTO.getFullName());

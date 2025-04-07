@@ -30,7 +30,7 @@ public class UserDTO {
         this.id = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
-        this.role = (user.getRole() != null) ? user.getRole().toString() : null;
+        this.role = (user.getRole() != null) ? user.getRole().toString() : null; // role cannot be null
         this.parentId = (user.getParent() != null) ? user.getParent().getId() : null;
         this.phoneno = user.getPhoneno();
         this.address = user.getAddress();

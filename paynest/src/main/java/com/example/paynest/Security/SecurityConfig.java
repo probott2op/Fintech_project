@@ -31,7 +31,7 @@ public class SecurityConfig {
         http.csrf(customizer -> customizer.disable());
         http.cors(Customizer.withDefaults());
         http.authorizeHttpRequests(customizer -> {
-                    customizer.requestMatchers("/v1/login", "/v1/register", "/v1/admin/login", "/swagger-ui/**", "/v3/api-docs").permitAll();
+                    customizer.requestMatchers("/api/login", "/api/register", "/v1/admin/login", "/swagger-ui/**", "/v3/api-docs").permitAll();
                     customizer.requestMatchers("/v1/parent/**").hasRole("PARENT");
                     customizer.anyRequest().authenticated();
                 }
