@@ -13,7 +13,7 @@ const Register = () => {
         role: 'CHILD', // Default role, can be changed to PARENT
         address: '',
         phoneno: '',
-        aadhaar: '',
+        poi: '',
 
     });
     const [error, setError] = useState('');
@@ -45,7 +45,7 @@ const Register = () => {
 
         try {
             // Remove confirmPassword before sending to API
-            const { confirmPassword, ...userDataToSend } = userData;
+            const { confirmPassword: _confirmPassword, ...userDataToSend } = userData;
             await UserService.register(userDataToSend);
             navigate('/login', { state: { message: 'Registration successful! Please login.' } });
         } catch (err) {
@@ -70,8 +70,8 @@ const Register = () => {
                                             <Form.Label>First Name</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                name="firstName"
-                                                value={userData.firstName}
+                                                name="fullName"
+                                                value={userData.fullName}
                                                 onChange={handleChange}
                                                 required
                                                 placeholder="Enter first name"
