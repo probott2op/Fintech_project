@@ -100,7 +100,7 @@ const Dashboard = () => {
         <Container className="my-4">
             <Row className="mb-4">
                 <Col>
-                    <h1>Welcome, {userData?.firstName}!</h1>
+                    <h1>Welcome, {userData?.fullName}!</h1>
                     <p className="text-muted">
                         {isParent ? 'Parent Dashboard' : 'Child Dashboard'} | Last login: {new Date().toLocaleDateString()}
                     </p>
