@@ -4,14 +4,9 @@ import com.example.paynest.DAO.*;
 import com.example.paynest.DTO.*;
 import com.example.paynest.entity.*;
 import com.example.paynest.service.BankingService;
-import com.example.paynest.service.security.JWTService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -33,10 +28,6 @@ public class BankingServiceImpl implements BankingService {
     private NotificationRepository notificationRepository;
     @Autowired
     private AuditLogRepository auditLogRepository;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JWTService jwtService;
     //private final PasswordEncoder passwordEncoder;//
 
     // ---- User Management ----
@@ -49,8 +40,7 @@ public class BankingServiceImpl implements BankingService {
         User user = new User();
         user.setFullName(userDTO.getFullName());
         user.setEmail(userDTO.getEmail());
-        final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-        user.setPassword(encoder.encode(userDTO.getPassword()));
+        user.setPassword(userDTO.getPassword());
 
         // Generate username from full name
         String generatedUsername = generateUsername(userDTO.getFullName());
@@ -96,12 +86,12 @@ public class BankingServiceImpl implements BankingService {
     public String loginUser(LoginRequestDTO loginRequestDTO) {
         User user = userRepository.findByUsername(loginRequestDTO.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.getUsername(), loginRequestDTO.getPassword()));
-        if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(loginRequestDTO.getUsername(), user.getRole(), user.getId());
+
+        if (!loginRequestDTO.getPassword().equals(user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
         }
 
-        throw new RuntimeException("Invalid credentials");
+        return "Login successful for user: " + user.getUsername();
     }
 
 
@@ -126,7 +116,7 @@ public class BankingServiceImpl implements BankingService {
         Account account = new Account();
         account.setUser(user);
         account.setAccountNumber(generateUniqueAccountNumber());
-;
+        ;
         account.setBalance(accountDTO.getBalance() != null ? accountDTO.getBalance() : BigDecimal.ZERO);
         account.setAccountType(accountDTO.getAccountType());
         LocalDateTime now = LocalDateTime.now();
@@ -223,7 +213,7 @@ public class BankingServiceImpl implements BankingService {
         transaction.setType(TransactionType.WITHDRAW);
         transaction.setAmount(withdrawAmount);
         transaction.setSender(account);//
-         transaction.setReceiver(account);//
+        transaction.setReceiver(account);//
 
 
         LocalDateTime now = LocalDateTime.now();
@@ -266,82 +256,83 @@ public class BankingServiceImpl implements BankingService {
         // Return the DTO representation
         return new TransactionDTO(transaction);
     }
+//transfer method modified
 
     @Override
     public TransactionDTO transfer(Long senderId, Long receiverId, TransactionRequestDTO transactionRequest) {
+        // Validate accounts
         Account sender = accountRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender account not found"));
         Account receiver = accountRepository.findById(receiverId)
                 .orElseThrow(() -> new RuntimeException("Receiver account not found"));
 
-
-
-
-        User senderUser =  sender.getUser();
-        User receiverUser = receiver.getUser();
-
+        User senderUser = sender.getUser();
         if (senderUser == null || senderUser.getId() == null) {
             throw new IllegalArgumentException("Sender user is missing or invalid");
         }
 
+        // Convert amount and check balance
         BigDecimal transferAmount = BigDecimal.valueOf(transactionRequest.getAmount());
-
-        if (sender.getBalance() .compareTo(transferAmount) <0) {
+        if (sender.getBalance().compareTo(transferAmount) < 0) {
             throw new RuntimeException("Insufficient funds");
         }
 
-        sender.setBalance(sender.getBalance() .subtract(transferAmount));
-        receiver.setBalance(receiver.getBalance() .add(transferAmount) );
+        // Update account balances
+        sender.setBalance(sender.getBalance().subtract(transferAmount));
+        receiver.setBalance(receiver.getBalance().add(transferAmount));
 
+        // Create a single transaction record for the transfer
+        Transaction transaction = new Transaction();
+        transaction.setType(TransactionType.TRANSFER);
+        transaction.setAmount(transferAmount);
+        transaction.setAccount(sender);  // Primary account association is with sender
+        transaction.setUser(senderUser); // User who initiated the transfer
+        transaction.setSender(sender);
+        transaction.setReceiver(receiver);
+
+        // Set audit fields
+        LocalDateTime now = LocalDateTime.now();
+        transaction.setCreatedAt(now);
+        transaction.setUpdatedAt(now);
+        transaction.setTimestamp(now);
+        transaction.setCreatedBy(senderUser.getId());
+        transaction.setUpdatedBy(senderUser.getId());
+        transaction.setApproved(true);  // Transfers are auto-approved unless you need approval logic
+
+        // Save all changes
         accountRepository.save(sender);
         accountRepository.save(receiver);
+        Transaction savedTransaction = transactionRepository.save(transaction);
 
+        // Create notifications if needed
+        createTransferNotifications(sender, receiver, transferAmount);
 
-        // ✅ Create separate transactions for sender & receiver
-        Transaction senderTransaction = new Transaction();
-
-
-
-        senderTransaction.setAccount(sender);
-
-        senderTransaction.setUser(senderUser);
-        senderTransaction.setAmount(transferAmount);
-
-        senderTransaction.setType(TransactionType.WITHDRAW);
-
-
-
-
-        LocalDateTime now = LocalDateTime.now();
-        senderTransaction.setCreatedAt(now);
-        senderTransaction.setUpdatedAt(now);
-        senderTransaction.setCreatedBy(senderUser.getId());
-        senderTransaction.setUpdatedBy(senderUser.getId());
-        senderTransaction.setTimestamp(now);
-
-
-        transactionRepository.save(senderTransaction);
-
-        Transaction receiverTransaction = new Transaction(receiver, transferAmount, TransactionType.DEPOSIT);
-        receiverTransaction.setId(receiver.getId());
-        receiverTransaction.setAccount(receiver);
-        receiverTransaction.setUser(receiverUser);
-        receiverTransaction.setAmount(transferAmount);
-
-        receiverTransaction .setType(TransactionType.DEPOSIT);
-
-        receiverTransaction.setCreatedAt(now);
-        receiverTransaction.setUpdatedAt(now);
-        receiverTransaction.setCreatedBy(receiverUser.getId());
-        receiverTransaction.setUpdatedBy(receiverUser.getId());
-        receiverTransaction.setTimestamp(now);
-
-
-        transactionRepository.save(receiverTransaction);
-
-
-        return new TransactionDTO(senderTransaction);
+        return new TransactionDTO(savedTransaction);
     }
+
+    // Helper method for notifications
+    private void createTransferNotifications(Account sender, Account receiver, BigDecimal amount) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Notification for sender
+        Notification senderNotification = new Notification();
+        senderNotification.setUser(sender.getUser());
+        senderNotification.setCreatedBy(sender.getUser().getId());
+        senderNotification.setMessage("Transfer of " + amount + " sent to account " + receiver.getAccountNumber());
+        senderNotification.setTimestamp(now);
+        senderNotification.setRead(false);
+        notificationRepository.save(senderNotification);
+
+        // Notification for receiver
+        Notification receiverNotification = new Notification();
+        receiverNotification.setUser(receiver.getUser());
+        receiverNotification.setCreatedBy(sender.getUser().getId());
+        receiverNotification.setMessage("Transfer of " + amount + " received from account " + sender.getAccountNumber());
+        receiverNotification.setTimestamp(now);
+        receiverNotification.setRead(false);
+        notificationRepository.save(receiverNotification);
+    }
+
 
     @Override
     public List<TransactionDTO> getTransactionHistory(Long accountId) {
@@ -379,7 +370,27 @@ public class BankingServiceImpl implements BankingService {
 
         transaction.setApproved(true);
         transactionRepository.save(transaction);
-        return true;
+
+        //Process the transaction (it  update balances and process the transactions)
+        Account account = transaction.getAccount();
+        BigDecimal amount = transaction.getAmount();
+
+        if (transaction.getType() == TransactionType.WITHDRAW) {
+            account.setBalance(account.getBalance().subtract(amount));
+            accountRepository.save(account);
+        } else if (transaction.getType() == TransactionType.TRANSFER) {
+            Account sender = transaction.getSender();
+            Account receiver = transaction.getReceiver();
+
+            sender.setBalance(sender.getBalance().subtract(amount));
+            receiver.setBalance(receiver.getBalance().add(amount));
+
+            accountRepository.save(sender);
+            accountRepository.save(receiver);
+        }
+
+        return true; //return true if approval was successful
+
     }
 
 
@@ -447,4 +458,3 @@ public class BankingServiceImpl implements BankingService {
     }
 
 }
-
