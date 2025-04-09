@@ -12,7 +12,8 @@ class AccountService {
         return axios.get(`${API_URL}/accounts/${accountId}`, UserService.getAuthHeader());
     }
 
-    async getUserAccounts(userId) {
+    async getUserAccounts() {
+        const userId = localStorage.getItem("userId");
         return axios.get(`${API_URL}/users/${userId}/accounts`, UserService.getAuthHeader());
     }
 

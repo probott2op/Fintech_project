@@ -27,8 +27,8 @@ const Dashboard = () => {
 
                 // Fetch user details
                 const userResponse = await UserService.getUserById(currentUser.userId);
-                setUserData(userResponse.data);
-                setIsParent(userResponse.data.role === 'PARENT');
+                setUserData(userResponse);
+                setIsParent(userResponse.role === 'PARENT');
 
                 // Fetch user accounts
                 const accountsResponse = await AccountService.getUserAccounts(currentUser.userId);

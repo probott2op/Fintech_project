@@ -4,9 +4,13 @@ import com.example.paynest.DAO.*;
 import com.example.paynest.DTO.*;
 import com.example.paynest.entity.*;
 import com.example.paynest.service.BankingService;
+import com.example.paynest.service.security.JWTService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,10 @@ public class BankingServiceImpl implements BankingService {
     private NotificationRepository notificationRepository;
     @Autowired
     private AuditLogRepository auditLogRepository;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JWTService jwtService;
     //private final PasswordEncoder passwordEncoder;//
 
     // ---- User Management ----
@@ -88,12 +96,12 @@ public class BankingServiceImpl implements BankingService {
     public String loginUser(LoginRequestDTO loginRequestDTO) {
         User user = userRepository.findByUsername(loginRequestDTO.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!loginRequestDTO.getPassword().equals(user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.getUsername(), loginRequestDTO.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return jwtService.generateToken(loginRequestDTO.getUsername(), user.getRole(), user.getId());
         }
 
-        return "Login successful for user: " + user.getUsername();
+        throw new RuntimeException("Invalid credentials");
     }
 
 

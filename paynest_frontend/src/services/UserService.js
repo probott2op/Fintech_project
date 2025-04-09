@@ -14,7 +14,7 @@ class UserService {
             localStorage.setItem('token', response.data);
             localStorage.setItem('userId', this.parseUserId(response.data));
         }
-        return response;
+        return response.data;
     }
 
     logout() {
@@ -55,7 +55,7 @@ class UserService {
 
     // User data endpoints
     async getUserById(userId) {
-        return axios.get(`${API_URL}/users/${userId}`, this.getAuthHeader());
+        return (await axios.get(`${API_URL}/users/${userId}`, this.getAuthHeader())).data;
     }
 
     async getAllUsers() {

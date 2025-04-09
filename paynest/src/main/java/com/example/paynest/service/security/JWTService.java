@@ -11,6 +11,7 @@ import java.util.function.Function;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import com.example.paynest.entity.Role;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -32,8 +33,10 @@ public class JWTService {
         }
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Role role, Long id) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", id);
+        claims.put("userRole", role);
         return Jwts.builder()
                 .claims()
                 .add(claims)

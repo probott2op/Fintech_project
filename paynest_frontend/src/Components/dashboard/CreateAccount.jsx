@@ -9,7 +9,7 @@ const CreateAccount = () => {
     const [accountData, setAccountData] = useState({
         accountName: '',
         accountType: 'SAVINGS',
-        initialDeposit: 0,
+        balance: 0,
         description: ''
     });
     const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ const CreateAccount = () => {
         const { name, value } = e.target;
         setAccountData({
             ...accountData,
-            [name]: name === 'initialDeposit' ? parseFloat(value) || 0 : value
+            [name]: name === 'balance' ? parseFloat(value) || 0 : value
         });
     };
 
@@ -41,7 +41,7 @@ const CreateAccount = () => {
             // Format the data for the API
             const formattedData = {
                 ...accountData,
-                balance: accountData.initialDeposit // Set initial balance
+                balance: accountData.balance // Set initial balance
             };
 
             await AccountService.createAccount(userId, formattedData);
@@ -102,8 +102,8 @@ const CreateAccount = () => {
                                     <Form.Label>Initial Deposit ($)</Form.Label>
                                     <Form.Control
                                         type="number"
-                                        name="initialDeposit"
-                                        value={accountData.initialDeposit}
+                                        name="balance"
+                                        value={accountData.balance}
                                         onChange={handleChange}
                                         min="0"
                                         step="0.01"
