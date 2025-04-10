@@ -26,7 +26,7 @@ class TransactionService {
             description: description
         };
         return axios.post(
-            `${API_URL}/accounts/transfer?senderId=${senderAccountId}&receiverId=${receiverAccountId}`,
+            `${API_URL}/accounts/transfer/${senderAccountId}/${receiverAccountId}`,
             request,
             UserService.getAuthHeader()
         );
