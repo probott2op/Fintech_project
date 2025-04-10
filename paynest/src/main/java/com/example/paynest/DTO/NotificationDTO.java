@@ -19,7 +19,8 @@ public class NotificationDTO {
         this.id = notification.getId();
         this.message = notification.getMessage();
         this.timestamp = notification.getTimestamp();
-        this.id = notification.getUser().getId(); // Ensure user exists
+        this.read = notification.isRead();
+        //this.id = notification.getUser().getId(); // Ensure user exists
     }
 
 }

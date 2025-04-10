@@ -15,6 +15,7 @@ const Register = () => {
         password: '',
         confirmPassword: '',
         role: 'PARENT', // Default role, can be changed to CHILD
+        parentId: '', // Add this new field for parent's Id
         address: '',
         phoneno: '',
         poi: '', // Proof of ID
@@ -45,6 +46,11 @@ const Register = () => {
                 }
                 if (userData.password.length < 8) {
                     setError('Password must be at least 8 characters long');
+                    return false;
+                }
+                // Add validation for parent username if role is CHILD
+                if (userData.role === 'CHILD' && !userData.parentId) {
+                    setError('Please provide parent\'s username');
                     return false;
                 }
                 return true;
@@ -150,7 +156,6 @@ const Register = () => {
                                 </Form.Group>
                             </Col>
                         </Row>
-
                         <Form.Group className="mb-3">
                             <Form.Label>Email</Form.Label>
                             <Form.Control
@@ -199,6 +204,24 @@ const Register = () => {
                                 <option value="PARENT">Parent Account</option>
                             </Form.Select>
                         </Form.Group>
+
+                        {/* Add conditional rendering for parent username field */}
+                        {userData.role === 'CHILD' && (
+                            <Form.Group className="mb-3">
+                                <Form.Label>Parent's Username</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="parentId"
+                                    value={userData.parentId}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Enter your parent's username"
+                                />
+                                <Form.Text className="text-muted">
+                                    Child accounts must be linked to a parent account.
+                                </Form.Text>
+                            </Form.Group>
+                        )}
                     </>
                 );
             case 2:
@@ -256,6 +279,8 @@ const Register = () => {
         }
     };
 
+    // Rest of the component remains the same...
+
     // If registration is successful and we have a username, show it
     if (successMessage) {
         return (
@@ -302,7 +327,6 @@ const Register = () => {
 
                             <Form onSubmit={handleSubmit}>
                                 {renderStep()}
-
                                 <div className="d-flex justify-content-between mt-4">
                                     {step > 1 && (
                                         <Button

@@ -24,7 +24,7 @@ const NotificationService = {
 
     markNotificationAsRead: async (notificationId) => {
         try {
-            const response = await axios.post(`${API_URL}/notifications/${notificationId}/mark-read`, getAuthHeader());
+            const response = await axios.post(`${API_URL}/notifications/${notificationId}/mark-read`,{}, getAuthHeader());
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Failed to mark notification as read');
