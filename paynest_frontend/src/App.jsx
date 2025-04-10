@@ -19,6 +19,7 @@ import AccountsList from './components/dashboard/AccountsList';
 import CreateAccount from './components/dashboard/CreateAccount';
 import TransactionHistory from './components/dashboard/TransactionHistory';
 import Profile from './components/dashboard/Profile';
+import AccountDetails from "./Components/dashboard/AccountDetails.jsx";
 
 // Transaction Components
 import Deposit from './components/transactions/Deposit';
@@ -29,6 +30,7 @@ import Transfer from './components/transactions/Transfer';
 import SetLimits from './components/parentControls/SetLimits';
 import PendingTransactions from './components/parentControls/PendingTransactions';
 import AuditLogs from './components/parentControls/AuditLogs';
+
 
 
 // Error Pages
@@ -85,6 +87,7 @@ const App = () => {
                             <Route element={<PrivateRoute />}>
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/accounts" element={<AccountsList />} />
+                                <Route path="/accounts/:id" element={<AccountDetails />} />
                                 <Route path="/accounts/create" element={<CreateAccount />} />
                                 <Route path="/transactions/history" element={<TransactionHistory />} />
                                 <Route path="/transactions/deposit" element={<Deposit />} />
