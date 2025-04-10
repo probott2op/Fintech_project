@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Image, Badge, Accordion } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Image, Badge, Accordion, Modal } from 'react-bootstrap';
 import UserService from "../../services/UserService.js";
 import AccountService from "../../services/AccountService.js";
+import TransactionHistory from "./TransactionHistory.jsx";
 
 const UserProfile = () => {
     const [user, setUser] = useState(null);
     const [childrenDetails, setChildrenDetails] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showTransactions, setShowTransactions] = useState(false);
+    const [selectedAccountId, setSelectedAccountId] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -48,6 +51,17 @@ const UserProfile = () => {
             console.error('Error fetching children details:', error);
             setLoading(false);
         }
+    };
+
+    // Show transaction history modal
+    const handleShowTransactions = (accountId) => {
+        setSelectedAccountId(accountId);
+        setShowTransactions(true);
+    };
+
+    // Close transaction history modal
+    const handleCloseTransactions = () => {
+        setShowTransactions(false);
     };
 
     // Helper function to format date
@@ -246,7 +260,13 @@ const UserProfile = () => {
                                                                         </Col>
                                                                     </Row>
                                                                     <div className="mt-2">
-                                                                        <Button variant="primary" size="sm">View Transactions</Button>
+                                                                        <Button
+                                                                            variant="primary"
+                                                                            size="sm"
+                                                                            onClick={() => handleShowTransactions(account.id)}
+                                                                        >
+                                                                            View Transactions
+                                                                        </Button>
                                                                         <Button variant="outline-primary" size="sm" className="ms-2">Deposit</Button>
                                                                         <Button variant="outline-primary" size="sm" className="ms-2">Withdraw</Button>
                                                                     </div>
@@ -272,6 +292,27 @@ const UserProfile = () => {
                     )}
                 </Col>
             </Row>
+
+            {/* Transaction History Modal */}
+            <Modal
+                show={showTransactions}
+                onHide={handleCloseTransactions}
+                size="lg"
+                backdrop="static"
+                keyboard={false}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Transaction History</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedAccountId && <TransactionHistory accountId={selectedAccountId} />}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseTransactions}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };
