@@ -18,6 +18,7 @@ import Dashboard from './components/dashboard/Dashboard';
 import AccountsList from './components/dashboard/AccountsList';
 import CreateAccount from './components/dashboard/CreateAccount';
 import TransactionHistory from './components/dashboard/TransactionHistory';
+import Profile from './components/dashboard/Profile';
 
 // Transaction Components
 import Deposit from './components/transactions/Deposit';
@@ -90,7 +91,7 @@ const App = () => {
                                 <Route path="/transactions/withdraw" element={<Withdraw />} />
                                 <Route path="/transactions/transfer" element={<Transfer />} />
                                 <Route path="/notifications" element={<Notifications />} />
-                                <Route path="/profile" element={<div>Profile Page</div>} />
+                                <Route path="/profile" element={<Profile />} />
                             </Route>
 
                             {/* Parent-Only Routes */}
