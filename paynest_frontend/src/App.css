@@ -1,0 +1,36 @@
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.empowering-img
+{
+  height: 300px;
+  width: 600px;
+  object-fit: cover;
+  border: 5px solid #2c3e50;
+  border-radius: 16px;
+}
+
+.info-img
+{
+  border: 5px solid #2c3e50;
+  border-radius: 12px;
+  height: 180px;
+  width: 180px;
+}
