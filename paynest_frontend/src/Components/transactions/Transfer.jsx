@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import UserService from '../../services/UserService';
 import { useNavigate } from 'react-router-dom';
+import AccountService from "../../services/AccountService.js";
+import TransactionService from "../../services/TransactionService.js";
 
 const Transfer = () => {
     const [accounts, setAccounts] = useState([]);
-    const [receiverAccounts, setReceiverAccounts] = useState([]);
     const [selectedAccount, setSelectedAccount] = useState('');
-    const [receiverAccount, setReceiverAccount] = useState('');
+    const [receiverAccountNumber, setReceiverAccountNumber] = useState('');
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
@@ -17,7 +18,6 @@ const Transfer = () => {
 
     useEffect(() => {
         fetchUserAccounts();
-        fetchAllAccounts();
     }, []);
 
     const fetchUserAccounts = async () => {
@@ -28,29 +28,11 @@ const Transfer = () => {
                 return;
             }
 
-            const response = await UserService.getUserAccounts(userId);
+            const response = await AccountService.getUserAccounts();
             setAccounts(response.data);
         } catch (error) {
             setError('Failed to load your accounts. Please try again.');
             console.error('Error fetching user accounts:', error);
-        }
-    };
-
-    const fetchAllAccounts = async () => {
-        try {
-            // In a real application, you'd have an API to fetch possible receiver accounts
-            // For now, we'll simulate this with a mock
-            const response = await UserService.getAllAccounts();
-
-            // Filter out user's own accounts
-            const userId = localStorage.getItem('userId');
-            const filteredAccounts = response.data.filter(
-                account => account.userId.toString() !== userId
-            );
-
-            setReceiverAccounts(filteredAccounts);
-        } catch (error) {
-            console.error('Error fetching receiver accounts:', error);
         }
     };
 
@@ -59,12 +41,14 @@ const Transfer = () => {
         setError('');
         setSuccess('');
 
-        if (!selectedAccount || !receiverAccount || !amount) {
+        if (!selectedAccount || !receiverAccountNumber || !amount) {
             setError('Please fill all required fields');
             return;
         }
 
-        if (selectedAccount === receiverAccount) {
+        // Check if the entered account number matches the sender's account
+        const senderAccount = accounts.find(account => account.id.toString() === selectedAccount);
+        if (senderAccount && senderAccount.accountNumber === receiverAccountNumber) {
             setError('Sender and receiver accounts cannot be the same');
             return;
         }
@@ -76,20 +60,23 @@ const Transfer = () => {
 
         const transferData = {
             amount: parseFloat(amount),
-            description: description || 'Transfer'
+            description: description || 'Transfer',
+            type: 'TRANSFER' // Include the account number directly
         };
 
         setLoading(true);
         try {
-            const response = await UserService.transferFunds(
+            const response = await TransactionService.transfer(
                 selectedAccount,
-                receiverAccount,
-                transferData
+                receiverAccountNumber, // Pass the account number instead of ID
+                parseFloat(amount),
+                description || 'Transfer'
             );
 
             setSuccess('Transfer completed successfully!');
             setAmount('');
             setDescription('');
+            setReceiverAccountNumber('');
 
             // If the parent needs to approve this transaction
             if (response.data.status === 'PENDING') {
@@ -138,19 +125,14 @@ const Transfer = () => {
                                 </Form.Group>
 
                                 <Form.Group className="mb-3">
-                                    <Form.Label>To Account</Form.Label>
-                                    <Form.Select
-                                        value={receiverAccount}
-                                        onChange={(e) => setReceiverAccount(e.target.value)}
+                                    <Form.Label>To Account Number</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter recipient account number"
+                                        value={receiverAccountNumber}
+                                        onChange={(e) => setReceiverAccountNumber(e.target.value)}
                                         required
-                                    >
-                                        <option value="">Select recipient account</option>
-                                        {receiverAccounts.map(account => (
-                                            <option key={account.id} value={account.id}>
-                                                {account.accountNumber} - {account.userName || 'User'}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
+                                    />
                                 </Form.Group>
 
                                 <Form.Group className="mb-3">

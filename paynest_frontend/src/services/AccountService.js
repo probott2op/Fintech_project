@@ -17,6 +17,10 @@ class AccountService {
         return axios.get(`${API_URL}/users/${userId}/accounts`, UserService.getAuthHeader());
     }
 
+    async getAccountsById(userId) {
+        return (await axios.get(`${API_URL}/users/${userId}/accounts`, UserService.getAuthHeader())).data;
+    }
+
     // Parent-Child controls
     async setTransactionLimit(parentId, childId, amount) {
         return axios.post(

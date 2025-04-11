@@ -109,7 +109,18 @@ public class BankingServiceImpl implements BankingService {
     public UserDTO getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return new UserDTO(user);
+
+        // Create the UserDTO from user entity
+        UserDTO userDTO = new UserDTO(user);
+
+        // If the user is a parent, fetch and set their children IDs
+        if (user.getRole() == Role.PARENT && user.getChildren() != null) {
+            List<Long> childIds = user.getChildren().stream()
+                    .map(User::getId)
+                    .toList();
+            userDTO.setChildIds(childIds);
+        }
+        return userDTO;
     }
 
     @Override
