@@ -1,33 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
+import UserService from '../../services/UserService';
 import AccountService from '../../services/AccountService';
 import TransactionService from '../../services/TransactionService';
 
 const SetLimits = () => {
-    const [childAccounts, setChildAccounts] = useState([]);
+    const [childrenDetails, setChildrenDetails] = useState([]);
     const [selectedChild, setSelectedChild] = useState('');
     const [amount, setAmount] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const parentId = localStorage.getItem('userId');
 
     useEffect(() => {
-        const fetchChildAccounts = async () => {
+        const fetchUserData = async () => {
             try {
-                setLoading(true);
-                // This would need to be implemented in your AccountService
-                const accounts = await AccountService.getChildAccounts(parentId);
-                setChildAccounts(accounts);
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to fetch child accounts');
+                const currentUser = UserService.getCurrentUser();
+                if (!currentUser.userId) {
+                    throw new Error('User not authenticated');
+                }
+                const response = await UserService.getUserById(currentUser.userId);
+
+                if (response.role === "PARENT" && response.childIds && response.childIds.length > 0) {
+                    await fetchChildrenDetails(response.childIds);
+                } else {
+                    setError('No child accounts found');
+                    setLoading(false);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setError('Failed to fetch user data');
                 setLoading(false);
             }
         };
 
-        fetchChildAccounts();
-    }, [parentId]);
+        fetchUserData();
+    }, []);
+
+    const fetchChildrenDetails = async (childIds) => {
+        try {
+            const childrenPromises = childIds.map(async (childId) => {
+                const childUser = await UserService.getUserById(childId);
+                const childAccounts = await AccountService.getAccountsById(childId);
+                return { ...childUser, accounts: childAccounts || [] };
+            });
+
+            const resolvedChildren = await Promise.all(childrenPromises);
+            setChildrenDetails(resolvedChildren);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching children details:', error);
+            setError('Failed to fetch children details');
+            setLoading(false);
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,7 +64,8 @@ const SetLimits = () => {
 
         try {
             setLoading(true);
-            await TransactionService.setTransactionLimit(parentId, selectedChild, amount);
+            const currentUser = UserService.getCurrentUser();
+            await AccountService.setTransactionLimit(currentUser.userId, selectedChild, amount);
             setSuccess('Transaction limit set successfully');
             setAmount('');
             setSelectedChild('');
@@ -66,13 +93,15 @@ const SetLimits = () => {
                             <Form.Select
                                 value={selectedChild}
                                 onChange={(e) => setSelectedChild(e.target.value)}
-                                disabled={loading || childAccounts.length === 0}
+                                disabled={loading || childrenDetails.length === 0}
                             >
                                 <option value="">Select a child account</option>
-                                {childAccounts.map((account) => (
-                                    <option key={account.userId} value={account.userId}>
-                                        {account.userName} ({account.accountNumber})
-                                    </option>
+                                {childrenDetails.map((child) => (
+                                    child.accounts.map((account) => (
+                                        <option key={account.id} value={child.id}>
+                                            {child.fullName} - {account.accountNumber} AccountId({account.id})
+                                        </option>
+                                    ))
                                 ))}
                             </Form.Select>
                         </Form.Group>
