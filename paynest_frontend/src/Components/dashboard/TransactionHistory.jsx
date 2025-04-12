@@ -102,7 +102,7 @@ const TransactionHistory = ({ accountId }) => {
                     >
                         {accounts.map(account => (
                             <option key={account.id} value={account.id}>
-                                {account.accountName} (${parseFloat(account.balance).toFixed(2)})
+                                {account.accountNumber} (${parseFloat(account.balance).toFixed(2)})
                             </option>
                         ))}
                     </Form.Select>
