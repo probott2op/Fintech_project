@@ -223,6 +223,9 @@ public class BankingServiceImpl implements BankingService {
             throw new IllegalStateException("Insufficient funds for withdrawal.");
         }
 
+        // Check daily transaction limit
+        checkDailyTransactionLimit(user, withdrawAmount);
+
         // Check if approval is required (Child account exceeding limit)
         boolean needsApproval = user.getRole() == Role.CHILD &&
                 (user.getTransactionLimit() == null || withdrawAmount.compareTo(user.getTransactionLimit()) > 0);
@@ -297,6 +300,9 @@ public class BankingServiceImpl implements BankingService {
         if (sender.getBalance().compareTo(transferAmount) < 0) {
             throw new RuntimeException("Insufficient funds");
         }
+
+        // Check daily transaction limit
+        checkDailyTransactionLimit(senderUser, transferAmount);
 
         // Update account balances
         sender.setBalance(sender.getBalance().subtract(transferAmount));
@@ -374,6 +380,14 @@ public class BankingServiceImpl implements BankingService {
 
         child.setTransactionLimit(amount);
         userRepository.save(child);
+        Notification notification = new Notification();
+        notification.setUser(child);
+        notification.setCreatedBy(parent.getId());
+        notification.setMessage("Your transaction limit has been set to " + amount + " (applies to both per-transaction and daily totals)");
+        notification.setTimestamp(LocalDateTime.now());
+        notification.setRead(false);
+        notificationRepository.save(notification);
+
     }
 
 
@@ -477,5 +491,38 @@ public class BankingServiceImpl implements BankingService {
 
         return username;
     }
+
+
+    //Add a helper method to check if a transaction would exceed the daily limit:
+    private void checkDailyTransactionLimit(User user, BigDecimal transactionAmount) {
+        if (user.getRole() == Role.CHILD && user.getTransactionLimit() != null) {
+            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+            LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+            BigDecimal dailyTotal = transactionRepository.getDailyTransactionTotal(
+                    user.getId(), startOfDay, endOfDay);
+
+            // If no transactions today, dailyTotal might be null
+            if (dailyTotal == null) {
+                dailyTotal = BigDecimal.ZERO;
+            }
+
+            // Check if this transaction would exceed the daily limit
+            if (dailyTotal.add(transactionAmount).compareTo(user.getTransactionLimit()) > 0) {
+                // Create notification for child about exceeded limit
+                Notification notification = new Notification();
+                notification.setUser(user);
+                notification.setCreatedBy(user.getId());
+                notification.setMessage("Transaction declined: Daily transaction limit of " +
+                        user.getTransactionLimit() + " exceeded");
+                notification.setTimestamp(LocalDateTime.now());
+                notification.setRead(false);
+                notificationRepository.save(notification);
+
+                throw new RuntimeException("Daily transaction limit exceeded");
+            }
+        }
+    }
+
 
 }

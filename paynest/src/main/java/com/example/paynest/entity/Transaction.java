@@ -24,6 +24,7 @@ public class Transaction {
     @Column(nullable = false)
     private BigDecimal amount;
 
+
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;//many transactions to one account linked
