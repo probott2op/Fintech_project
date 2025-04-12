@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Card, Badge, Alert } from 'react-bootstrap';
 import TransactionService from '../../services/TransactionService';
+import AccountService from "../../services/AccountService.js";
 
 const PendingTransactions = () => {
     const [pendingTransactions, setPendingTransactions] = useState([]);
@@ -12,7 +13,7 @@ const PendingTransactions = () => {
     const fetchPendingTransactions = async () => {
         try {
             setLoading(true);
-            const transactions = await TransactionService.getPendingTransactions(parentId);
+            const transactions = await AccountService.getPendingTransactions(parentId);
             setPendingTransactions(transactions);
             setLoading(false);
         } catch (err) {
@@ -28,7 +29,7 @@ const PendingTransactions = () => {
     const handleApprove = async (transactionId) => {
         try {
             setLoading(true);
-            await TransactionService.approveTransaction(parentId, transactionId);
+            await AccountService.approveTransaction(parentId, transactionId);
             setSuccess('Transaction approved successfully');
             // Refresh the list of pending transactions
             fetchPendingTransactions();

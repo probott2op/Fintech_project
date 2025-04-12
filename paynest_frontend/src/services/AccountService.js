@@ -31,19 +31,19 @@ class AccountService {
     }
 
     async getPendingTransactions(parentId) {
-        return axios.get(`${API_URL}/parents/${parentId}/pending-transactions`, UserService.getAuthHeader());
+        return (await axios.get(`${API_URL}/parents/${parentId}/pending-transactions`, UserService.getAuthHeader())).data;
     }
 
     async approveTransaction(parentId, transactionId) {
-        return axios.post(
+        return (await axios.post(
             `${API_URL}/parents/${parentId}/approve-transaction?transactionId=${transactionId}`,
             {},
             UserService.getAuthHeader()
-        );
+        )).data;
     }
 
     async getAuditLogs(parentId) {
-        return axios.get(`${API_URL}/parents/${parentId}/audit-logs`, UserService.getAuthHeader());
+        return (await axios.get(`${API_URL}/parents/${parentId}/audit-logs`, UserService.getAuthHeader())).data;
     }
 }
 

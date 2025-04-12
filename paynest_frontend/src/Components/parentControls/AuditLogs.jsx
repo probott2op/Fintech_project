@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Card, Form, Row, Col, Badge, Alert } from 'react-bootstrap';
 import TransactionService from '../../services/TransactionService';
+import AccountService from "../../services/AccountService.js";
 
 const AuditLogs = () => {
     const [auditLogs, setAuditLogs] = useState([]);
@@ -13,7 +14,7 @@ const AuditLogs = () => {
         const fetchAuditLogs = async () => {
             try {
                 setLoading(true);
-                const logs = await TransactionService.getAuditLogs(parentId);
+                const logs = await AccountService.getAuditLogs(parentId);
                 setAuditLogs(logs);
                 setLoading(false);
             } catch (err) {
