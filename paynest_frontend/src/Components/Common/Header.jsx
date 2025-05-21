@@ -59,10 +59,6 @@ const Header = () => {
                         {user && (
                             <>
                                 <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
-                                <NavDropdown title="Accounts" id="accounts-dropdown">
-                                    <NavDropdown.Item as={Link} to="/accounts">My Accounts</NavDropdown.Item>
-                                    <NavDropdown.Item as={Link} to="/accounts/create">Create Account</NavDropdown.Item>
-                                </NavDropdown>
                                 <NavDropdown title="Transactions" id="transactions-dropdown">
                                     <NavDropdown.Item as={Link} to="/transactions/deposit">Deposit</NavDropdown.Item>
                                     <NavDropdown.Item as={Link} to="/transactions/withdraw">Withdraw</NavDropdown.Item>
