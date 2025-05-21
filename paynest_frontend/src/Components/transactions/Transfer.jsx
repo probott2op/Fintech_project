@@ -4,8 +4,11 @@ import UserService from '../../services/UserService';
 import { useNavigate } from 'react-router-dom';
 import AccountService from "../../services/AccountService.js";
 import TransactionService from "../../services/TransactionService.js";
+import { useSearchParams } from 'react-router-dom';
 
 const Transfer = () => {
+    const [searchParams] = useSearchParams();
+    const accountIdFromUrl = searchParams.get('accountId');
     const [accounts, setAccounts] = useState([]);
     const [selectedAccount, setSelectedAccount] = useState('');
     const [receiverAccountNumber, setReceiverAccountNumber] = useState('');
@@ -30,6 +33,21 @@ const Transfer = () => {
 
             const response = await AccountService.getUserAccounts();
             setAccounts(response.data);
+            if (accountIdFromUrl) {
+                const matchingAccount = response.data.find(acc => acc.id.toString() === accountIdFromUrl);
+                if (matchingAccount) {
+                    setSelectedAccount(matchingAccount.id.toString());
+                } else {
+                    // accountIdFromUrl invalid or doesn't belong to user — select none or first account (your choice)
+                    setSelectedAccount(''); // or setSelectedAccount(response.data[0]?.id.toString() || '');
+                }
+            } else {
+                // No accountIdFromUrl, so don't preselect any account OR
+                // Uncomment next line to select first account by default
+                // setSelectedAccount(response.data[0]?.id.toString() || '');
+                setSelectedAccount('');  // no preselection
+            }
+        
         } catch (error) {
             setError('Failed to load your accounts. Please try again.');
             console.error('Error fetching user accounts:', error);
