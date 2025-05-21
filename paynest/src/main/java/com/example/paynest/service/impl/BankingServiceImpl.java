@@ -172,7 +172,7 @@ public class BankingServiceImpl implements BankingService {
 
         User user = account.getUser();
 
-        account.setBalance(account.getBalance().add(BigDecimal.valueOf(transactionRequest.getAmount())));
+//        account.setBalance(account.getBalance().add(BigDecimal.valueOf(transactionRequest.getAmount())));
         accountRepository.save(account);
 
         Transaction transaction = new Transaction(account, BigDecimal.valueOf(transactionRequest.getAmount()), TransactionType.DEPOSIT);
