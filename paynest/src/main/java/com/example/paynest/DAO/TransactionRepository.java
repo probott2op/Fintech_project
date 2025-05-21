@@ -29,6 +29,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay
     );
+
 }
 
 

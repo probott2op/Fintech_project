@@ -33,5 +33,7 @@ public interface BankingService {
     List<NotificationDTO> getUserNotifications(Long userId);
     void markNotificationAsRead(Long notificationId);
     List<AuditLogDTO> getAuditLogs(Long parentId);
+    //edit user profile by adding put mapping
+    UserDTO updateUserProfile(Long userId, UserDTO userDTO);
 }
 

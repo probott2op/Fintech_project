@@ -172,7 +172,7 @@ public class BankingServiceImpl implements BankingService {
 
         User user = account.getUser();
 
-        account.setBalance(account.getBalance().add(BigDecimal.valueOf(transactionRequest.getAmount())));
+
         accountRepository.save(account);
 
         Transaction transaction = new Transaction(account, BigDecimal.valueOf(transactionRequest.getAmount()), TransactionType.DEPOSIT);
@@ -523,6 +523,51 @@ public class BankingServiceImpl implements BankingService {
             }
         }
     }
+// adding new changes-edit profile.
+    @Override
+    public UserDTO updateUserProfile(Long userId, UserDTO userDTO) {
+        // Find the user by ID
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // Update only the allowed profile fields
+        if (userDTO.getFullName() != null) {
+            user.setFullName(userDTO.getFullName());
+        }
+
+        if (userDTO.getPhoneno() != null) {
+            user.setPhoneno(userDTO.getPhoneno());
+        }
+
+        if (userDTO.getAddress() != null) {
+            user.setAddress(userDTO.getAddress());
+        }
+
+        if (userDTO.getPoi() != null) {
+            user.setPoi(userDTO.getPoi());
+        }
+
+        // Update audit fields
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedBy(userId); // Self-update
+
+        // Add notification
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setCreatedBy(userId);
+        notification.setMessage("Your profile has been updated successfully");
+        notification.setTimestamp(LocalDateTime.now());
+        notification.setRead(false);
+        notificationRepository.save(notification);
+
+
+        // Save the updated user
+        User updatedUser = userRepository.save(user);
+
+        // Return the updated user as DTO
+        return new UserDTO(updatedUser);
+    }
+
 
 
 }

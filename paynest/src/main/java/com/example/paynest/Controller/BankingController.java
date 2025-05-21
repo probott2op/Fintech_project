@@ -39,6 +39,15 @@ public class BankingController {
         return ResponseEntity.ok(bankingService.getAllUsers());
     }
 
+    //edit profile new changes
+    @PutMapping("/users/{userId}/profile")
+    public ResponseEntity<UserDTO> updateUserProfile(@PathVariable Long userId,
+                                                     @RequestBody UserDTO userDTO) {
+        UserDTO updatedUser = bankingService.updateUserProfile(userId, userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+
     // ---- 🟢 Account Management ----
 
     @PostMapping("/users/{userId}/accounts")
