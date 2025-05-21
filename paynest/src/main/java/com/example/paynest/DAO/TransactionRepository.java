@@ -30,6 +30,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("endOfDay") LocalDateTime endOfDay
     );
 
+    List<Transaction> findByAccountAndTimestampBetween(Account account, LocalDateTime start, LocalDateTime end);
+
 }
 
 

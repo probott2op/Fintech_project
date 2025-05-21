@@ -5,6 +5,8 @@ import com.example.paynest.DTO.*;
 import com.example.paynest.entity.*;
 import com.example.paynest.service.BankingService;
 import com.example.paynest.service.security.JWTService;
+import com.example.paynest.util.PdfHelper;
+import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -567,6 +571,44 @@ public class BankingServiceImpl implements BankingService {
         // Return the updated user as DTO
         return new UserDTO(updatedUser);
     }
+//downlaod statement pdf report
+    @Autowired
+    private PdfHelper pdfHelper;
+
+    @Override
+    public void generateAccountStatementPdf(Long accountId, String startDate, String endDate, OutputStream outputStream) {
+        // Parse dates
+        LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+        LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
+
+        // Get account
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found with ID: " + accountId));
+
+        // Get transactions for this account within date range
+        List<Transaction> transactions = transactionRepository.findByAccountAndTimestampBetween(
+                account, start, end);
+
+        // Convert to DTOs
+        List<TransactionDTO> transactionDTOs = transactions.stream()
+                .map(TransactionDTO::new)
+                .toList();
+
+        try {
+            pdfHelper.generateAccountStatement(account, transactionDTOs, outputStream);
+        } catch (DocumentException e) {
+            throw new RuntimeException("Failed to generate PDF statement", e);
+        }
+
+        // Log this activity
+        AuditLog auditLog = new AuditLog();
+        auditLog.setId(account.getUser().getId());
+        auditLog.setAction("STATEMENT_DOWNLOAD");
+        auditLog.setDetails("Downloaded account statement for account " + account.getAccountNumber());
+        auditLog.setTimestamp(LocalDateTime.now());
+        auditLogRepository.save(auditLog);
+    }
+
 
 
 

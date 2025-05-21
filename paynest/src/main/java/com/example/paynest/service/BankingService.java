@@ -2,6 +2,7 @@ package com.example.paynest.service;
 
 import com.example.paynest.DTO.*;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -35,5 +36,10 @@ public interface BankingService {
     List<AuditLogDTO> getAuditLogs(Long parentId);
     //edit user profile by adding put mapping
     UserDTO updateUserProfile(Long userId, UserDTO userDTO);
+
+    // ---- Account Statement ----(download pdf statement)
+
+    void generateAccountStatementPdf(Long accountId, String startDate, String endDate, OutputStream outputStream);
 }
+
 
