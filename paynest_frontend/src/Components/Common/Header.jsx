@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Navbar, Nav, Container, Button, NavDropdown, Badge } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button, NavDropdown, Badge, Image } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../utils/AuthContext';
 import NotificationService from '../../services/NotificationService';
@@ -119,7 +119,34 @@ const Header = () => {
                                     )}
                                 </NavDropdown>
 
-                                <NavDropdown title={user.firstName} id="user-dropdown">
+                                <style>
+                                    {`
+                                        #user-dropdown .dropdown-toggle::after 
+                                            {
+                                            display: none !important;
+                                            }
+                                    `}
+                                </style>
+                                <NavDropdown
+                                    title={
+                                        <div className="d-flex align-items-center">
+                                            <Image
+                                                src={`https://ui-avatars.com/api/?name=${user.fullName}&background=random&size=128`}
+                                                alt="avatar"
+                                                roundedCircle
+                                                className="me-2"
+                                                style={{
+                                                    width: '32px',
+                                                    height: '32px',
+                                                    objectFit: 'cover',
+                                                    border: '2px solid white'
+                                                }}
+                                            />
+                                            {user.firstName}
+                                        </div>
+                                    }
+                                    id="user-dropdown"
+                                >
                                     <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>

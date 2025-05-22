@@ -267,8 +267,7 @@ const UserProfile = () => {
                                                                         >
                                                                             View Transactions
                                                                         </Button>
-                                                                        <Button variant="outline-primary" size="sm" className="ms-2">Deposit</Button>
-                                                                        <Button variant="outline-primary" size="sm" className="ms-2">Withdraw</Button>
+                                                                        <Button variant="outline-primary" size="sm" className="ms-2">Transfer</Button>
                                                                     </div>
                                                                 </Accordion.Body>
                                                             </Accordion.Item>
