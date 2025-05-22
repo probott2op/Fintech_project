@@ -45,6 +45,7 @@ public class PdfHelper {
 
         // Account information
         document.add(new Paragraph("Account Number: " + account.getAccountNumber(), headerFont));
+        document.add(new Paragraph("Account Id: " + account.getId(), headerFont));
         document.add(new Paragraph("Account Holder: " + account.getUser().getFullName(), normalFont));
         document.add(new Paragraph("Statement Date: " +
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")), normalFont));
@@ -63,7 +64,7 @@ public class PdfHelper {
         addTableHeader(table);
 
         // Add transaction data
-        addTransactionData(table, transactions, account.getAccountNumber());
+        addTransactionData(table, transactions, account.getId());
 
         document.add(table);
 
@@ -92,7 +93,7 @@ public class PdfHelper {
         }
     }
 
-    private void addTransactionData(PdfPTable table, List<TransactionDTO> transactions, String accountNumber) {
+    private void addTransactionData(PdfPTable table, List<TransactionDTO> transactions, Long accountId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         Font dataFont = FontFactory.getFont(FontFactory.HELVETICA, 9);
 
@@ -120,7 +121,7 @@ public class PdfHelper {
             table.addCell(cell);
 
             // Description
-            String description = getTransactionDescription(transaction, accountNumber);
+            String description = getTransactionDescription(transaction, accountId);
             cell = new PdfPCell(new Phrase(description, dataFont));
             cell.setPadding(4);
             table.addCell(cell);
@@ -133,16 +134,16 @@ public class PdfHelper {
         }
     }
 
-    private String getTransactionDescription(TransactionDTO transaction, String accountNumber) {
+    private String getTransactionDescription(TransactionDTO transaction, Long accountId) {
         if ("DEPOSIT".equals(transaction.getType())) {
             return "Deposit to account";
         } else if ("WITHDRAW".equals(transaction.getType())) {
             return "Withdrawal from account";
         } else if ("TRANSFER".equals(transaction.getType())) {
-            if (transaction.getSenderAccountNumber().equals(accountNumber)) {
-                return "Transfer to: " + transaction.getReceiverAccountNumber();
+            if (transaction.getSenderId().equals(accountId)) {
+                return "Transfer to: " + transaction.getReceiverId();
             } else {
-                return "Transfer from: " + transaction.getSenderAccountNumber();
+                return "Transfer from: " + transaction.getSenderId();
             }
         }
         return "";
