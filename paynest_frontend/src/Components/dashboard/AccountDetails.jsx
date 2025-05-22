@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { FaMoneyBillWave, FaCalendarAlt, FaUserCircle, FaCreditCard } from 'react-icons/fa';
 import AccountService from "../../services/AccountService.js";
+import { Link } from 'react-router-dom';
 
 const AccountDetails = () => {
     const [account, setAccount] = useState(null);
@@ -69,8 +70,8 @@ const AccountDetails = () => {
                             <p className="text-muted mb-1">{maskedAccountNumber}</p>
                             <p className="text-muted mb-4">User ID: {account.userId}</p>
                             <div className="d-flex justify-content-center mb-2">
-                                <Button variant="primary">Transfer Money</Button>
-                                <Button variant="outline-primary" className="ms-1">View Transactions</Button>
+                                <Button as={Link} to={`/transactions/transfer?accountId=${account.id}`} variant="primary">Transfer Money</Button>
+                                <Button as={Link} to={`/transactions/history?accountId=${account.id}`} variant="outline-primary" className="ms-1">View Transactions</Button>
                             </div>
                         </Card.Body>
                     </Card>
