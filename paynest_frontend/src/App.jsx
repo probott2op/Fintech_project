@@ -64,7 +64,7 @@ const HomePage = () => (
                 </div>
             </div>
             <div className="col-md-6">
-                <img src="/api/placeholder/600/400" alt="Banking illustration" className="img-fluid rounded shadow" />
+                <img src="./assets/paynest_logo.jpeg" alt="Banking illustration" className="img-fluid rounded shadow" />
             </div>
         </div>
     </div>
