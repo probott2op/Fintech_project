@@ -19,6 +19,9 @@ public class TransactionDTO {
     private Long senderId;  // For transfers
     private Long receiverId;  // For transfers
     private Boolean approved;
+    private String senderAccountNumber;
+    private String receiverAccountNumber;
+
 
     // Constructor to map from Transaction entity
     public TransactionDTO(Transaction transaction) {
@@ -36,5 +39,9 @@ public class TransactionDTO {
             this.senderId = transaction.getAccount() != null ? transaction.getAccount().getId() : null;
             this.receiverId = null; // No toAccount for DEPOSIT/WITHDRAW
         }
+    }
+
+    public boolean isApproved() {
+        return approved;
     }
 }
