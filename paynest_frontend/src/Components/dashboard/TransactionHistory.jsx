@@ -3,8 +3,11 @@ import { Card, Table, Form, Badge, Button, Alert } from 'react-bootstrap';
 import TransactionService from '../../services/TransactionService';
 import AccountService from '../../services/AccountService';
 import UserService from '../../services/UserService';
+import { useSearchParams } from 'react-router-dom';
 
 const TransactionHistory = ({ accountId }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const accountIdFromUrl = searchParams.get('accountId');
     const [transactions, setTransactions] = useState([]);
     const [accounts, setAccounts] = useState([]);
     const [selectedAccountId, setSelectedAccountId] = useState(accountId);
@@ -34,7 +37,10 @@ const TransactionHistory = ({ accountId }) => {
                 setAccounts(accountsResponse.data);
 
                 // Set default selected account if not provided
-                const accId = accountId || (accountsResponse.data.length > 0 ? accountsResponse.data[0].id : null);
+                const accId =
+                accountIdFromUrl ||
+                accountId ||
+                (accountsResponse.data.length > 0 ? accountsResponse.data[0].id : null);
                 setSelectedAccountId(accId);
 
                 if (accId) {
@@ -49,11 +55,12 @@ const TransactionHistory = ({ accountId }) => {
         };
 
         fetchData();
-    }, [accountId]);
+    }, [accountIdFromUrl, accountId]);
 
     const handleAccountChange = (e) => {
         const accId = e.target.value;
         setSelectedAccountId(accId);
+        setSearchParams({ accountId: accId });
         fetchTransactions(accId);
     };
 
