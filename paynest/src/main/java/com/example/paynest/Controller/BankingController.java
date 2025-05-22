@@ -2,11 +2,13 @@ package com.example.paynest.Controller;
 
 import com.example.paynest.DTO.*;
 import com.example.paynest.service.BankingService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -38,6 +40,15 @@ public class BankingController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         return ResponseEntity.ok(bankingService.getAllUsers());
     }
+
+    //edit profile new changes
+    @PutMapping("/users/{userId}/profile")
+    public ResponseEntity<UserDTO> updateUserProfile(@PathVariable Long userId,
+                                                     @RequestBody UserDTO userDTO) {
+        UserDTO updatedUser = bankingService.updateUserProfile(userId, userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
 
     // ---- 🟢 Account Management ----
 
@@ -119,4 +130,20 @@ public class BankingController {
     public ResponseEntity<List<AuditLogDTO>> getAuditLogs(@PathVariable Long parentId) {
         return ResponseEntity.ok(bankingService.getAuditLogs(parentId));
     }
+
+    @GetMapping("/accounts/{accountId}/statement")
+    public void downloadAccountStatementPdf(
+            @PathVariable Long accountId,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            HttpServletResponse response) throws IOException {
+
+        // Set response headers
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=account_statement_" + accountId + ".pdf");
+
+        // Generate and write PDF to response output stream
+        bankingService.generateAccountStatementPdf(accountId, startDate, endDate, response.getOutputStream());
+    }
+
 }
