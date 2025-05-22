@@ -5,7 +5,7 @@ import { AuthProvider } from './utils/AuthContext';
 import PrivateRoute from './utils/PrivateRoute';
 
 // Common Components
-import Header from './components/common/Header';
+import Header from './Components/Common/Header';
 import Footer from './components/common/Footer';
 import Notifications from './components/common/Notifications';
 

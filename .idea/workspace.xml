@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="4f3dada2-da33-4cba-ac5f-f8852dc0f3c3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/util/PdfHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/paynest/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/Controller/BankingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/Controller/BankingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/DAO/TransactionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/DAO/TransactionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/DTO/TransactionDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/DTO/TransactionDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/service/BankingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/service/BankingService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/service/impl/BankingServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/paynest/src/main/java/com/example/paynest/service/impl/BankingServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest_frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/paynest_frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest_frontend/src/Components/Common/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/paynest_frontend/src/Components/Common/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/paynest_frontend/src/Components/dashboard/Profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/paynest_frontend/src/Components/dashboard/Profile.jsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1
+}]]></component>
+  <component name="ProjectId" id="2xS2JmtNqhYXfTFLn80yd5Op16n" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/Users/nishantdahiya/Fintech_project"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4f3dada2-da33-4cba-ac5f-f8852dc0f3c3" name="Changes" comment="" />
+      <created>1747917084785</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747917084785</updated>
+    </task>
+    <servers />
+  </component>
+</project>
