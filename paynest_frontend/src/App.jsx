@@ -1,6 +1,7 @@
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthProvider } from './utils/AuthContext';
 import PrivateRoute from './utils/PrivateRoute';
 
@@ -31,8 +32,6 @@ import SetLimits from './components/parentControls/SetLimits';
 import PendingTransactions from './components/parentControls/PendingTransactions';
 import AuditLogs from './components/parentControls/AuditLogs';
 
-
-
 // Error Pages
 const UnauthorizedPage = () => (
     <div className="container text-center py-5">
@@ -49,26 +48,38 @@ const NotFoundPage = () => (
 );
 
 // Landing Page
-const HomePage = () => (
-    <div className="container">
-        <div className="row justify-content-center align-items-center py-5">
-            <div className="col-md-6">
-                <h1 className="display-4 mb-4">Welcome to PayNest</h1>
-                <p className="lead">
-                    The modern banking solution designed for families. Teach your children about financial
-                    responsibility in a safe, controlled environment.
-                </p>
-                <div className="mt-4">
-                    <a href="/login" className="btn btn-primary me-2">Login</a>
-                    <a href="/register" className="btn btn-outline-secondary">Register</a>
+const HomePage = () => {
+    const navigate = useNavigate();
+
+    const loginHandle = () => {
+        navigate('/login');
+    };
+
+    const registerHandle = () => {
+        navigate('/register');
+    };
+
+    return (
+        <div className="container">
+            <div className="row justify-content-center align-items-center py-5">
+                <div className="col-md-6">
+                    <h1 className="display-4 mb-4">Welcome to PayNest</h1>
+                    <p className="lead">
+                        The modern banking solution designed for families. Teach your children about financial
+                        responsibility in a safe, controlled environment.
+                    </p>
+                    <div className="mt-4">
+                        <button onClick={loginHandle} className="btn btn-primary me-2">Login</button>
+                        <button onClick={registerHandle} className="btn btn-outline-secondary">Register</button>
+                    </div>
+                </div>
+                <div className="col-md-6">
+                    <img src="./assets/paynest_logo.jpeg" alt="Banking illustration" className="img-fluid rounded shadow" />
                 </div>
             </div>
-            <div className="col-md-6">
-                <img src="./assets/paynest_logo.jpeg" alt="Banking illustration" className="img-fluid rounded shadow" />
-            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const App = () => {
     return (
