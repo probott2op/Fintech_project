@@ -4,10 +4,12 @@ import { useParams } from 'react-router-dom';
 import { FaMoneyBillWave, FaCalendarAlt, FaUserCircle, FaCreditCard } from 'react-icons/fa';
 import AccountService from "../../services/AccountService.js";
 import { Link } from 'react-router-dom';
+import DownloadStatementModal from "../transactions/DownloadStatementModal.jsx";
 
 const AccountDetails = () => {
     const [account, setAccount] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
     const { id } = useParams();
 
     useEffect(() => {
@@ -80,7 +82,19 @@ const AccountDetails = () => {
                         <Card.Header className="bg-light">Quick Actions</Card.Header>
                         <Card.Body>
                             <div className="d-grid gap-2">
-                                <Button variant="outline-primary" size="sm">Download Statement</Button>
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => setShowDownloadModal(true)}
+                                >
+                                    Download Statement
+                                </Button>
+
+                                <DownloadStatementModal
+                                    accountId={account.userId}
+                                    show={showDownloadModal}
+                                    onClose={() => setShowDownloadModal(false)}
+                                />
                                 <Button variant="outline-primary" size="sm">Update Account Details</Button>
                                 <Button variant="outline-danger" size="sm">Report Issue</Button>
                             </div>

@@ -45,6 +45,13 @@ class AccountService {
     async getAuditLogs(parentId) {
         return (await axios.get(`${API_URL}/parents/${parentId}/audit-logs`, UserService.getAuthHeader())).data;
     }
+
+    async getAccountStatement(accountId, { startDate, endDate }) {
+        return axios.get(`/api/accounts/${accountId}/statement`, {
+            params: { startDate, endDate },
+            responseType: 'blob' // Important for file downloads
+        });
+    };
 }
 
 export default new AccountService();
