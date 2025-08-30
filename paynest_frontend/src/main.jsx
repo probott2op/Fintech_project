@@ -7,8 +7,8 @@ import MouseTracker from './MouseTracker.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <MouseTracker> */}
+    <MouseTracker>
       <App />
-    {/* </MouseTracker> */}
+    </MouseTracker>
   </StrictMode>
 )

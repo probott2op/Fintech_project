@@ -516,167 +516,244 @@ const MouseTracker = ({ children }) => {
   );
 
   return (
-    <div ref={containerRef} className="relative w-full min-h-screen">
-      {/* Control Panel */}
-      {showControls && (
-        <div className="absolute top-4 right-4 z-50 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg border">
-          <div className="flex flex-col gap-3">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsTracking(!isTracking)}
-                className={`px-3 py-2 rounded-md flex items-center gap-2 text-sm font-medium ${
-                  isTracking 
-                    ? 'bg-red-500 hover:bg-red-600 text-white' 
-                    : 'bg-green-500 hover:bg-green-600 text-white'
-                }`}
-              >
-                {isTracking ? <PauseIcon /> : <PlayIcon />}
-                {isTracking ? 'Stop' : 'Start'} Tracking
-              </button>
-              
-              <button
-                onClick={() => setShowVisualization(!showVisualization)}
-                className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md flex items-center gap-2 text-sm"
-              >
-                {showVisualization ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
-            </div>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={exportData}
-                className="px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md flex items-center gap-2 text-sm"
-              >
-                <DownloadIcon />
-                Export JPG
-              </button>
-              
-              <button
-                onClick={clearData}
-                className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md flex items-center gap-2 text-sm"
-              >
-                <TrashIcon />
-                Clear
-              </button>
-            </div>
-            
-            <div className="border-t pt-2">
-              <div className="text-xs text-gray-600 mb-2">Color Mode:</div>
-              <select 
-                value={settings.colorMode}
-                onChange={(e) => setSettings(prev => ({...prev, colorMode: e.target.value}))}
-                className="w-full px-2 py-1 text-xs border rounded"
-              >
-                <option value="speed">Speed</option>
-                <option value="time">Time</option>
-                <option value="density">Density</option>
-              </select>
-            </div>
-            
-            <div className="text-xs text-gray-600">
-              Points: {mouseData.length} | Clicks: {clicks.length}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hidden toggle indicator - shows when controls are hidden */}
-      {!showControls && (
-        <div className="absolute top-4 right-4 z-50 bg-black/20 backdrop-blur-sm rounded-lg px-2 py-1">
-          <div className="text-xs text-white/70">
-            Alt+H to toggle controls
-          </div>
-        </div>
-      )}
-
-      {/* Legend */}
-      {showVisualization && (
-        <div className="absolute bottom-4 left-4 z-50 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
-          <div className="text-xs font-medium mb-2">Legend</div>
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-1 bg-gradient-to-r from-blue-500 to-red-500 rounded"></div>
-              <span>Mouse Trail ({settings.colorMode})</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 border-2 border-red-500 rounded-full"></div>
-              <span>Left Clicks</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 border-2 border-blue-500 rounded-full"></div>
-              <span>Right Clicks</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gradient-to-r from-blue-400 via-green-400 to-red-400 rounded opacity-50"></div>
-              <span>Heat Map</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500">
-              <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Alt+H</kbd>
-              <span>Toggle Controls</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Heatmap Canvas */}
-      {showVisualization && (
-        <canvas
-          ref={heatmapRef}
-          className="absolute top-0 left-0 pointer-events-none z-10"
-          style={{ 
-            mixBlendMode: 'multiply',
-            width: '100%',
-            height: '100%'
-          }}
-        />
-      )}
-
-      {/* Trail Canvas */}
-      {showVisualization && (
-        <canvas
-          ref={canvasRef}
-          className="absolute top-0 left-0 pointer-events-none z-20"
-          style={{
-            width: '100%',
-            height: '100%'
-          }}
-        />
-      )}
-
-      {/* App content */}
-      <div className="relative z-30">
-        {children || (
-          <div className="p-8 h-full">
-            <h1 className="text-3xl font-bold mb-4">Mouse Tracking Demo</h1>
-            <p className="text-gray-600 mb-4">
-              Start tracking to see mouse movements, clicks, and heatmaps visualized in real-time.
-              <br />
-              <span className="text-sm font-medium">Press <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Alt+H</kbd> to toggle the control panel.</span>
-            </p>
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-blue-100 p-6 rounded-lg">
-                <h2 className="text-xl font-semibold mb-2">Trail Visualization</h2>
-                <p className="text-sm text-gray-700">
-                  Real-time mouse movement trails with color-coded speed, time, or density.
-                </p>
+    <>
+      {/* Bootstrap CSS CDN */}
+      <link 
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" 
+        rel="stylesheet" 
+      />
+      
+      <div ref={containerRef} className="position-relative w-100 vh-100">
+        {/* Control Panel */}
+        {showControls && (
+          <div 
+            className="position-absolute card shadow-lg border-0"
+            style={{
+              top: '1rem',
+              right: '1rem',
+              zIndex: 50,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <div className="card-body">
+              <div className="d-flex flex-column gap-3">
+                <div className="d-flex gap-2">
+                  <button
+                    onClick={() => setIsTracking(!isTracking)}
+                    className={`btn btn-sm d-flex align-items-center gap-2 fw-medium ${
+                      isTracking 
+                        ? 'btn-danger' 
+                        : 'btn-success'
+                    }`}
+                  >
+                    {isTracking ? <PauseIcon /> : <PlayIcon />}
+                    {isTracking ? 'Stop' : 'Start'} Tracking
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowVisualization(!showVisualization)}
+                    className="btn btn-primary btn-sm d-flex align-items-center gap-2"
+                  >
+                    {showVisualization ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
+                
+                <div className="d-flex gap-2">
+                  <button
+                    onClick={exportData}
+                    className="btn btn-secondary btn-sm d-flex align-items-center gap-2"
+                    style={{ backgroundColor: '#6f42c1', borderColor: '#6f42c1' }}
+                  >
+                    <DownloadIcon />
+                    Export JPG
+                  </button>
+                  
+                  <button
+                    onClick={clearData}
+                    className="btn btn-secondary btn-sm d-flex align-items-center gap-2"
+                  >
+                    <TrashIcon />
+                    Clear
+                  </button>
+                </div>
+                
+                <div className="border-top pt-2">
+                  <div className="small text-muted mb-2">Color Mode:</div>
+                  <select 
+                    value={settings.colorMode}
+                    onChange={(e) => setSettings(prev => ({...prev, colorMode: e.target.value}))}
+                    className="form-select form-select-sm"
+                  >
+                    <option value="speed">Speed</option>
+                    <option value="time">Time</option>
+                    <option value="density">Density</option>
+                  </select>
+                </div>
+                
+                <div className="small text-muted">
+                  Points: {mouseData.length} | Clicks: {clicks.length}
+                </div>
               </div>
-              <div className="bg-green-100 p-6 rounded-lg">
-                <h2 className="text-xl font-semibold mb-2">Click Patterns</h2>
-                <p className="text-sm text-gray-700">
-                  Visual feedback for left/right clicks with ripple effects.
-                </p>
-              </div>
-            </div>
-            <div className="bg-red-100 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-2">Heat Maps</h2>
-              <p className="text-sm text-gray-700">
-                Density-based visualization showing areas of high mouse activity.
-              </p>
             </div>
           </div>
         )}
+
+        {/* Hidden toggle indicator - shows when controls are hidden */}
+        {!showControls && (
+          <div 
+            className="position-absolute rounded px-2 py-1"
+            style={{
+              top: '1rem',
+              right: '1rem',
+              zIndex: 50,
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            {/* <div className="small" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              Alt+H to toggle controls
+            </div> */}
+          </div>
+        )}
+
+        {/* Legend */}
+        {showVisualization && (
+          <div 
+            className="position-absolute card shadow-lg border-0"
+            style={{
+              bottom: '1rem',
+              left: '1rem',
+              zIndex: 50,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <div className="card-body p-3">
+              <div className="small fw-medium mb-2">Legend</div>
+              <div className="d-flex flex-column gap-1">
+                <div className="d-flex align-items-center gap-2 small">
+                  <div 
+                    className="rounded"
+                    style={{
+                      width: '1rem',
+                      height: '0.25rem',
+                      background: 'linear-gradient(to right, #3b82f6, #ef4444)'
+                    }}
+                  ></div>
+                  <span>Mouse Trail ({settings.colorMode})</span>
+                </div>
+                <div className="d-flex align-items-center gap-2 small">
+                  <div 
+                    className="rounded-circle"
+                    style={{
+                      width: '0.75rem',
+                      height: '0.75rem',
+                      border: '2px solid #ef4444'
+                    }}
+                  ></div>
+                  <span>Left Clicks</span>
+                </div>
+                <div className="d-flex align-items-center gap-2 small">
+                  <div 
+                    className="rounded-circle"
+                    style={{
+                      width: '0.75rem',
+                      height: '0.75rem',
+                      border: '2px solid #3b82f6'
+                    }}
+                  ></div>
+                  <span>Right Clicks</span>
+                </div>
+                <div className="d-flex align-items-center gap-2 small">
+                  <div 
+                    className="rounded"
+                    style={{
+                      width: '1rem',
+                      height: '1rem',
+                      background: 'linear-gradient(to right, #60a5fa, #4ade80, #f87171)',
+                      opacity: 0.5
+                    }}
+                  ></div>
+                  <span>Heat Map</span>
+                </div>
+                <div className="d-flex align-items-center gap-2 small text-muted">
+                  <kbd className="px-1 py-0 bg-dark rounded small">Alt+H</kbd>
+                  <span>Toggle Controls</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Heatmap Canvas */}
+        {showVisualization && (
+          <canvas
+            ref={heatmapRef}
+            className="position-absolute top-0 start-0"
+            style={{ 
+              mixBlendMode: 'multiply',
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 10
+            }}
+          />
+        )}
+
+        {/* Trail Canvas */}
+        {showVisualization && (
+          <canvas
+            ref={canvasRef}
+            className="position-absolute top-0 start-0"
+            style={{
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 20
+            }}
+          />
+        )}
+
+        {/* App content */}
+        <div className="position-relative" style={{ zIndex: 30 }}>
+          {children || (
+            <div className="p-4 h-100">
+              <h1 className="display-4 fw-bold mb-4">Mouse Tracking Demo</h1>
+              <p className="text-muted mb-4">
+                Start tracking to see mouse movements, clicks, and heatmaps visualized in real-time.
+                <br />
+                <span className="small fw-medium">Press <kbd className="px-1 py-0 bg-light rounded small">Alt+H</kbd> to toggle the control panel.</span>
+              </p>
+              <div className="row g-4 mb-4">
+                <div className="col-md-6">
+                  <div className="p-4 rounded" style={{ backgroundColor: '#dbeafe' }}>
+                    <h2 className="h5 fw-semibold mb-2">Trail Visualization</h2>
+                    <p className="small text-muted">
+                      Real-time mouse movement trails with color-coded speed, time, or density.
+                    </p>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="p-4 rounded" style={{ backgroundColor: '#dcfce7' }}>
+                    <h2 className="h5 fw-semibold mb-2">Click Patterns</h2>
+                    <p className="small text-muted">
+                      Visual feedback for left/right clicks with ripple effects.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 rounded" style={{ backgroundColor: '#fecaca' }}>
+                <h2 className="h5 fw-semibold mb-2">Heat Maps</h2>
+                <p className="small text-muted">
+                  Density-based visualization showing areas of high mouse activity.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
