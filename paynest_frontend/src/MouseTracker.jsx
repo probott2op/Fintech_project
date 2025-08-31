@@ -19,6 +19,8 @@ const MouseTracker = ({ children }) => {
   const heatmapRef = useRef(null);
   const animationRef = useRef(null);
   const lastPositionRef = useRef({ x: 0, y: 0, time: Date.now() });
+  const lastCaptureTimeRef = useRef(0);
+  const CAPTURE_INTERVAL = 20; // 20ms interval
   
   // Keyboard shortcut handler
   useEffect(() => {
@@ -46,8 +48,12 @@ const MouseTracker = ({ children }) => {
   
   const getColorByTime = (timestamp, currentTime) => {
     const age = (currentTime - timestamp) / 1000;
-    const opacity = Math.max(0.1, 1 - (age / 10));
-    return `hsla(${(timestamp / 100) % 360}, 70%, 60%, ${opacity * settings.trailOpacity})`;
+    // Keep trail visible much longer - fade over 30 seconds instead of 5
+    const maxAge = 30;
+    const opacity = Math.max(0.3, 1 - (age / maxAge)); // Minimum opacity of 0.3
+    const normalizedAge = Math.min(age / maxAge, 1); // Normalize to 0-1 over 30 seconds
+    const hue = (1 - normalizedAge) * 240; // Blue (240) to Red (0) over time
+    return `hsla(${hue}, 70%, 60%, ${opacity * settings.trailOpacity})`;
   };
   
   const getColorByDensity = (density) => {
@@ -59,10 +65,14 @@ const MouseTracker = ({ children }) => {
   const handleMouseMove = useCallback((e) => {
     if (!isTracking) return;
     
+    const currentTime = Date.now();
+    // Only capture if enough time has passed since last capture
+    if (currentTime - lastCaptureTimeRef.current < CAPTURE_INTERVAL) return;
+    
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const timestamp = Date.now();
+    const timestamp = currentTime;
     
     const lastPos = lastPositionRef.current;
     const distance = Math.sqrt(
@@ -86,6 +96,7 @@ const MouseTracker = ({ children }) => {
     });
     
     lastPositionRef.current = { x, y, time: timestamp };
+    lastCaptureTimeRef.current = currentTime;
   }, [isTracking, settings.trailLength]);
   
   const handleClick = useCallback((e) => {
@@ -115,10 +126,14 @@ const MouseTracker = ({ children }) => {
     const handleDocumentMouseMove = (e) => {
       if (!isTracking) return;
       
+      const currentTime = Date.now();
+      // Only capture if enough time has passed since last capture
+      if (currentTime - lastCaptureTimeRef.current < CAPTURE_INTERVAL) return;
+      
       const rect = container.getBoundingClientRect();
       const x = e.clientX - rect.left + window.scrollX;
       const y = e.clientY - rect.top + window.scrollY;
-      const timestamp = Date.now();
+      const timestamp = currentTime;
       
       const lastPos = lastPositionRef.current;
       const distance = Math.sqrt(
@@ -137,6 +152,7 @@ const MouseTracker = ({ children }) => {
       
       setMouseData(prev => [...prev, newPoint]);
       lastPositionRef.current = { x, y, time: timestamp };
+      lastCaptureTimeRef.current = currentTime;
     };
     
     const handleDocumentClick = (e) => {
@@ -313,10 +329,19 @@ const MouseTracker = ({ children }) => {
     
     const resizeCanvas = () => {
       const rect = container.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = Math.max(rect.height, window.innerHeight);
-      heatmapCanvas.width = rect.width;
-      heatmapCanvas.height = Math.max(rect.height, window.innerHeight);
+      const width = Math.max(rect.width, window.innerWidth);
+      const height = Math.max(rect.height, window.innerHeight, 800); // Minimum height
+      
+      // Set both CSS size and canvas resolution
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.width = width;
+      canvas.height = height;
+      
+      heatmapCanvas.style.width = '100%';
+      heatmapCanvas.style.height = '100%';
+      heatmapCanvas.width = width;
+      heatmapCanvas.height = height;
     };
     
     resizeCanvas();
@@ -523,7 +548,7 @@ const MouseTracker = ({ children }) => {
         rel="stylesheet" 
       />
       
-      <div ref={containerRef} className="position-relative w-100 vh-100">
+      <div ref={containerRef} className="position-relative" style={{ width: '100%', minHeight: '100vh', overflow: 'hidden' }}>
         {/* Control Panel */}
         {showControls && (
           <div 
@@ -690,11 +715,13 @@ const MouseTracker = ({ children }) => {
         {showVisualization && (
           <canvas
             ref={heatmapRef}
-            className="position-absolute top-0 start-0"
+            className="position-absolute"
             style={{ 
-              mixBlendMode: 'multiply',
+              top: 0,
+              left: 0,
               width: '100%',
               height: '100%',
+              mixBlendMode: 'multiply',
               pointerEvents: 'none',
               zIndex: 10
             }}
@@ -705,8 +732,10 @@ const MouseTracker = ({ children }) => {
         {showVisualization && (
           <canvas
             ref={canvasRef}
-            className="position-absolute top-0 start-0"
+            className="position-absolute"
             style={{
+              top: 0,
+              left: 0,
               width: '100%',
               height: '100%',
               pointerEvents: 'none',
@@ -718,7 +747,7 @@ const MouseTracker = ({ children }) => {
         {/* App content */}
         <div className="position-relative" style={{ zIndex: 30 }}>
           {children || (
-            <div className="p-4 h-100">
+            <div className="p-4" style={{ height: '100%' }}>
               <h1 className="display-4 fw-bold mb-4">Mouse Tracking Demo</h1>
               <p className="text-muted mb-4">
                 Start tracking to see mouse movements, clicks, and heatmaps visualized in real-time.
